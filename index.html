@@ -218,7 +218,7 @@ a { text-decoration: none; color: inherit; }
   display: flex; flex-direction: column; gap: 0.9rem; min-width: 0; order: 1;
 }
 .modal-img-col {
-  width: 25rem; flex-shrink: 0;
+  width: 16.25rem; flex-shrink: 0;
   border-radius: 0 1.125rem 1.125rem 0;
   background: linear-gradient(160deg, var(--azul-oscuro), var(--azul-medio));
   overflow: hidden; position: relative; order: 2;
@@ -298,6 +298,7 @@ a { text-decoration: none; color: inherit; }
 .ml-web     { background: #e4f8f0; color: #1a6040; }
 .ml-email   { background: #edf3ff; color: #2c5baa; }
 .ml-grupo   { background: #f0eaff; color: #5b2d9e; }
+.ml-horus   { background: #e6f4f1; color: #1a6b5a; }
 .grupo-links { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-top: 0.4rem; }
 .modal-desc { font-size: 0.86rem; color: var(--gris); line-height: 1.75; font-weight: 300; }
 
@@ -377,6 +378,12 @@ a { text-decoration: none; color: inherit; }
         <option value="matematica_financiera">Matemática Financiera</option>
         <option value="computacion">Computación</option>
         <option value="ensenianza">Enseñanza</option>
+      </select>
+      <select class="filter-select" id="filterCategoria">
+        <option value="">Categoría investigador</option>
+        <option value="junior">Junior</option>
+        <option value="asociado">Asociado</option>
+        <option value="senior">Sénior</option>
       </select>
     </div>
     <span class="results-count" id="resultsCount"></span>
@@ -486,7 +493,8 @@ var ICO = {
   check:   'M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z',
   close:   'M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z',
   star:    'M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z',
-  info:    'M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z'
+  info:    'M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z',
+  horus:   'M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 3c1.93 0 3.5 1.57 3.5 3.5S13.93 13 12 13s-3.5-1.57-3.5-3.5S10.07 6 12 6zm7 13H5v-.23c0-.62.28-1.2.76-1.58C7.47 15.82 9.64 15 12 15s4.53.82 6.24 2.19c.48.38.76.97.76 1.58V19z'
 };
 
 function statusBadge(est) {
@@ -538,6 +546,7 @@ function applyFilters() {
   var dept = document.getElementById('filterDept').value;
   var ded  = document.getElementById('filterDed').value;
   var area = document.getElementById('filterArea').value;
+  var cat  = document.getElementById('filterCategoria').value;
 
   filteredProfs = allProfs.filter(function(p) {
     var n = nm(p).toLowerCase();
@@ -545,6 +554,7 @@ function applyFilters() {
     if (dept && p.departamento !== dept) return false;
     if (ded  && p.dedicacion   !== ded) return false;
     if (area && !(p.area||'').toLowerCase().includes(area)) return false;
+    if (cat  && (p.categoria_investigador||'').trim().toLowerCase() !== cat) return false;
     return true;
   });
 
@@ -671,6 +681,7 @@ function openModal(idx) {
   var sc   = ok(p.google_scholar)  ? esc(p.google_scholar)    : '';
   var rg   = ok(p.researchgate)    ? esc(p.researchgate)      : '';
   var wb   = ok(p.pagina_personal) ? esc(p.pagina_personal)   : '';
+  var hr   = ok(p.horus)           ? esc(p.horus)             : '';
   var grRaw = ok(p.grupo_de_investigacion) ? p.grupo_de_investigacion.trim() : '';
   var dsc  = ok(p.descripcion) ? esc(p.descripcion) : '';
   var est  = estadoNorm(p);
@@ -687,6 +698,7 @@ function openModal(idx) {
   if (sc)  links += '<a href="'+sc+'" target="_blank" class="mlink ml-scholar"><svg viewBox="0 0 24 24"><path d="M5.242 13.769 12 10l6.758 3.769-.894 1.787L12 12l-5.864 3.556L5.242 13.77zM12 4l8 4.5v.05c.018.09.018.28 0 .37v.08L12 13 4 9V8.5L12 4z"/></svg>Google Scholar</a>';
   if (rg)  links += '<a href="'+rg+'" target="_blank" class="mlink ml-rgate"><svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 14.5v-9l6 4.5-6 4.5z"/></svg>ResearchGate</a>';
   if (wb)  links += '<a href="'+wb+'" target="_blank" class="mlink ml-web"><svg viewBox="0 0 24 24"><path d="'+ICO.link+'"/></svg>Página personal</a>';
+  if (hr)  links += '<a href="'+hr+'" target="_blank" class="mlink ml-horus"><svg viewBox="0 0 24 24"><path d="'+ICO.horus+'"/></svg>Horus</a>';
 
   var h =
     '<div class="modal-layout">'
@@ -729,7 +741,7 @@ document.getElementById('searchInput').addEventListener('keydown', function(e){
 document.addEventListener('click', function(e){
   if (!e.target.closest('.search-wrap')) document.getElementById('sugBox').style.display = 'none';
 });
-['filterDept','filterDed','filterArea'].forEach(function(id){
+['filterDept','filterDed','filterArea','filterCategoria'].forEach(function(id){
   document.getElementById(id).addEventListener('change', applyFilters);
 });
 document.getElementById('modalOverlay').addEventListener('click', function(e){
